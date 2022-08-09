@@ -13,7 +13,8 @@ import {
 } from "../constants/orderConstants";
 import getBlockchain from "../ethereum";
 import axios from "../../node_modules/axios/index";
-import { ethers } from "ethers";
+// import { ethers } from "ethers";
+const { ethers } = window.ethers;
 
 export default function OrderScreen(props) {
   const params = useParams();
@@ -100,20 +101,24 @@ export default function OrderScreen(props) {
       );
       // console.log(order.totalPrice.toString(), "paymentid", response1.data);
 
+      console.log(
+        paymentProcessor.address,
+        ethers.utils.parseEther(order.totalPrice.toString()),
+        order.totalPrice.toString()
+      );
       // approve the payment processor to spend the dai
       const tx1 = await dai.approve(
         paymentProcessor.address,
         ethers.utils.parseEther(order.totalPrice.toString())
       );
 
-      debugger;
       // A wait method on the transaction object
       await tx1.wait();
 
       console.log("approved to spend dai");
       //this second transaction does the actual payment
       const tx2 = await paymentProcessor.pay(
-        ethers.utils.parseEther(order.totalPrice.toString()),
+        ethers.utils.parseUnits("55", 18),
         response1.data.paymentId
       );
       await tx2.wait();
@@ -127,7 +132,6 @@ export default function OrderScreen(props) {
       // );
       // console.log(response2);
     } catch (error) {
-      debugger;
       throw error;
     }
   };
