@@ -9,7 +9,7 @@ contract PaymentProcessor {
 
     event PaymentDone(
         address payer,
-        uint amount,
+        uint256 amount,
         string paymentId,
         uint date
     );
@@ -19,7 +19,7 @@ contract PaymentProcessor {
         dai = IERC20(daiAddress);
     }
 
-    function pay(uint amount, string memory paymentId) external {
+    function pay(uint256 amount, string memory paymentId) external {
         dai.transferFrom(msg.sender, admin, amount);
         emit PaymentDone(msg.sender, amount, paymentId, block.timestamp);
     }
