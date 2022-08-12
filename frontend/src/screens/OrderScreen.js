@@ -1,18 +1,18 @@
-import Axios from "axios";
-import { PayPalButton } from "react-paypal-button-v2";
-import { useParams } from "react-router-dom";
-import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom";
-import { deliverOrder, detailsOrder, payOrder } from "../actions/orderActions";
-import LoadingBox from "../components/LoadingBox";
-import MessageBox from "../components/MessageBox";
+import Axios from 'axios';
+import { PayPalButton } from 'react-paypal-button-v2';
+import { useParams } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
+import { deliverOrder, detailsOrder, payOrder } from '../actions/orderActions';
+import LoadingBox from '../components/LoadingBox';
+import MessageBox from '../components/MessageBox';
 import {
   ORDER_DELIVER_RESET,
   ORDER_PAY_RESET,
-} from "../constants/orderConstants";
-import getBlockchain from "../ethereum";
-import axios from "../../node_modules/axios/index";
+} from '../constants/orderConstants';
+import getBlockchain from '../ethereum';
+import axios from '../../node_modules/axios/index';
 // import { ethers } from "ethers";
 const { ethers } = window.ethers;
 
@@ -52,9 +52,9 @@ export default function OrderScreen(props) {
   }, []);
   useEffect(() => {
     const addPayPalScript = async () => {
-      const { data } = await Axios.get("/api/config/paypal");
-      const script = document.createElement("script");
-      script.type = "text/javascript";
+      const { data } = await Axios.get('/api/config/paypal');
+      const script = document.createElement('script');
+      script.type = 'text/javascript';
       script.src = `https://www.paypal.com/sdk/js?client-id=${data}`;
       script.async = true;
       script.onload = () => {
@@ -89,8 +89,8 @@ export default function OrderScreen(props) {
     dispatch(deliverOrder(order._id));
   };
 
-  if (window.ethereum === "undefined") {
-    alert("Download and install metamask");
+  if (window.ethereum === 'undefined') {
+    alert('Download and install metamask');
   }
 
   const buy = async (order) => {
@@ -99,38 +99,42 @@ export default function OrderScreen(props) {
       const response1 = await axios.get(
         `http://localhost:5000/api/payment/getPaymentId/${order._id}`
       );
-      // console.log(order.totalPrice.toString(), "paymentid", response1.data);
+      // console.log(order.totalPrice.toString(), 'paymentid', response1.data);
 
-      console.log(
-        paymentProcessor.address,
-        ethers.utils.parseEther(order.totalPrice.toString()),
-        order.totalPrice.toString()
-      );
+      // console.log(
+      //   paymentProcessor.address,
+      //   ethers.utils.parseEther(order.totalPrice.toString()),
+      //   order.totalPrice.toString()
+      // );
       // approve the payment processor to spend the dai
       const tx1 = await dai.approve(
         paymentProcessor.address,
         ethers.utils.parseEther(order.totalPrice.toString())
       );
 
-      // A wait method on the transaction object
+      // // A wait method on the transaction object
       await tx1.wait();
 
-      console.log("approved to spend dai");
+      console.log('approved to spend dai');
       //this second transaction does the actual payment
-      const tx2 = await paymentProcessor.pay(
-        ethers.utils.parseUnits("55", 18),
-        response1.data.paymentId
-      );
-      await tx2.wait();
+      // const tx2 = await paymentProcessor.pay(
+      //   ethers.utils.parseEther(order.totalPrice.toString()),
+      //   response1.data.paymentId
+      // );
+      // await tx2.wait();
 
-      console.log("done payment");
+      console.log('done payment');
       /* this line of code gives the backend time to listen to the payment event from the block chain
     and update the payment status in th backend....so we make it wait 5 secs = 5000 mili secs */
       // await new Promise((resolve) => setTimeout(resolve, 5000));
       // const response2 = await Axios.get(
       //   `${API_URL}/api/getItemUrl/${response1.data.paymentId}`
       // );
-      // console.log(response2);
+
+      const response2 = await axios.put(
+        'http://localhost:5000/api/orders/' + order._id + '/pay'
+      );
+      console.log(response2.data);
     } catch (error) {
       throw error;
     }
@@ -152,17 +156,17 @@ export default function OrderScreen(props) {
                 <p>
                   <strong>Name:</strong> {order.shippingAddress.fullName} <br />
                   <strong>Address: </strong> {order.shippingAddress.address},
-                  {order.shippingAddress.city},{" "}
+                  {order.shippingAddress.city},{' '}
                   {order.shippingAddress.postalCode},
                   {order.shippingAddress.country}
                 </p>
-                {order.isDelivered ? (
+                {/* {order.isDelivered ? (
                   <MessageBox variant="success">
                     Delivered at {order.deliveredAt}
                   </MessageBox>
                 ) : (
                   <MessageBox variant="danger">Not Delivered</MessageBox>
-                )}
+                )} */}
               </div>
             </li>
             <li>
@@ -171,13 +175,13 @@ export default function OrderScreen(props) {
                 <p>
                   <strong>Method:</strong> {order.paymentMethod}
                 </p>
-                {order.isPaid ? (
+                {/* {order.isPaid ? (
                   <MessageBox variant="success">
                     Paid at {order.paidAt}
                   </MessageBox>
                 ) : (
                   <MessageBox variant="danger">Not Paid</MessageBox>
-                )}
+                )} */}
               </div>
             </li>
             <li>
